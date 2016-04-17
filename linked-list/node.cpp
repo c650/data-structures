@@ -7,6 +7,8 @@ node<T>::~node() {
 	if (next != nullptr) {
 		delete next;
 	}
+
+	debug("node<T>::~node was called!");
 }
 
 template <class T>
@@ -20,7 +22,6 @@ void node<T>::d(T _data) {
 }
 
 template <class T>
-std::ostream& node<T>::operator<<(std::ostream& out) {
-	out << data;
-	return out;
+void node<T>::print() {
+	std::cout << data << "\n";
 }

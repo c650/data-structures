@@ -3,8 +3,8 @@
 template <class T>
 class List {
   private:
-	node<T>* root;
-	size_t len;
+	  node<T>* root;
+	  size_t len;
 
   public:
 
@@ -21,6 +21,5 @@ class List {
 
   	size_t size();
 
-  	std::ostream& operator<<(std::ostream& out);
-
+    void print();
 };

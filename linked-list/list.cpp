@@ -24,27 +24,42 @@ T& List<T>::operator[](size_t idx) {
 
 template <class T>
 void List<T>::append(T _data) {
+	if (root == nullptr) {
+		root = new node<T>(_data);
+		debug("root was nullptr, so data inserted there");
+		len++;
+		return;
+	}
+
 	node<T>* h = root;
+	debug("root node stored in h");
 
 	while(h->next != nullptr) {
 		h = h->next;
 	}
+	debug("got to end of linked list");
 	
 	h->next = new node<T>(_data);
+	debug("new node has been made");
 
 	len++;
 }
 
 template <class T>
 T List<T>::pop() {
+	if (root == nullptr) {
+		throw std::out_of_range("ERROR: root is nullptr, cannot pop()");
+	}
 	node<T>* h = root;
 
-	while(h->next != nullptr) {
+	while(h->next->next != nullptr) {
 		h = h->next;
 	}
-	T tmp = std::move( h->d() );
+	T tmp = std::move( h->next->d() );
 
-	delete h;
+	delete h->next;
+
+	h->next = nullptr;
 
 	return tmp;
 }
@@ -55,16 +70,16 @@ size_t List<T>::size() {
 }
 
 template <class T>
-std::ostream& List<T>::operator<<(std::ostream& out) {
+void List<T>::print() {
 	node<T>* h = root;
 
-	out << "| ";
+    std::cout << "| ";
 
-	while(h != nullptr) {
-		out << h->d() << " ";
-	}
+    while(h != nullptr) {
+      std::cout << h->d() << " ";
 
-	out << "|\n";
+      h = h->next;
+    }
 
-	return out;
+    std::cout << "|\n";
 }

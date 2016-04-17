@@ -15,5 +15,5 @@ class node {
 	T& d(); // data accessor
 	void d(T _data); // data setter
 
-	std::ostream& operator<<(std::ostream& out);
+	void print();
 };
