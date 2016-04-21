@@ -65,6 +65,59 @@ T List<T>::pop() {
 }
 
 template <class T>
+node<T>* List<T>::search(const T& q) {
+	node<T>* h = root;
+
+	while(h != nullptr) {
+
+		if (h->d() == q)
+			return h;
+
+		h = h->next;
+	}
+
+	return nullptr;
+}
+
+template <class T>
+node<T>* List<T>::insert(T val, const size_t& idx) {
+	node<T>* h = root;
+	size_t cnt = 0;
+
+	while(cnt < idx - 1 && h/*->next*/ != nullptr) {
+		h = h->next;
+		cnt++;
+	}
+
+	if (cnt == idx - 1) {
+		if (h != nullptr) {
+
+			node<T>* new_node = new node<T>(val);
+
+			new_node->next = h->next;
+			
+			h->next = new_node;
+
+			len++; // update length
+
+			return new_node;
+		} else {
+			// idk??
+		}
+	} else {
+		return nullptr;
+	}
+
+	// WATCH THIS LINE
+	return nullptr;
+}
+
+template <class T>
+T List<T>::del(const size_t& idx) {
+	
+}
+
+template <class T>
 size_t List<T>::size() {
 	return len;
 }

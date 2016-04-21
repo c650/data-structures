@@ -18,15 +18,20 @@ int main() {
 
 	mylist.print();
 
-	std::cout << "mylist.size() = " << mylist.size() << "\n";
+	node<int>* s = mylist.search(6);
 
-	std::cout << "popping... popped: " << mylist.pop() << "\n";
+	if (s != nullptr) {
+		std::cout << "6 was found in mylist!!!\n";
+	} else {
+		std::cout << "6 was not found in mylist\n";
+	}
 
-	std::cout << "now reprint:\n";
+	auto a = mylist.insert(7, 9);
+
+	if (a == nullptr) {
+		std::cout <<"convention worked\n";
+	}
 
 	mylist.print();
-
-	std::cout << "mylist[1] = "<< mylist[1] << "\n";
-
 	return 0;
 }
