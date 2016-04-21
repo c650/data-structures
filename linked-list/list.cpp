@@ -26,21 +26,21 @@ template <class T>
 void List<T>::append(T _data) {
 	if (root == nullptr) {
 		root = new node<T>(_data);
-		debug("root was nullptr, so data inserted there");
+		//debug("root was nullptr, so data inserted there");
 		len++;
 		return;
 	}
 
 	node<T>* h = root;
-	debug("root node stored in h");
+	//debug("root node stored in h");
 
 	while(h->next != nullptr) {
 		h = h->next;
 	}
-	debug("got to end of linked list");
+	//debug("got to end of linked list");
 	
 	h->next = new node<T>(_data);
-	debug("new node has been made");
+	//debug("new node has been made");
 
 	len++;
 }
@@ -101,11 +101,8 @@ node<T>* List<T>::insert(T val, const size_t& idx) {
 			len++; // update length
 
 			return new_node;
-		} else {
-			// idk??
-		}
-	} else {
-		return nullptr;
+		} 
+		// should i have else?!?!?
 	}
 
 	// WATCH THIS LINE
@@ -114,7 +111,31 @@ node<T>* List<T>::insert(T val, const size_t& idx) {
 
 template <class T>
 T List<T>::del(const size_t& idx) {
-	
+	node<T>* h = root;
+	size_t cnt = 0;
+
+	while(cnt < idx - 1 && h/*->next*/ != nullptr) {
+		h = h->next;
+		cnt++;
+	}
+
+	if (cnt == idx - 1) {
+		if (h != nullptr) {
+			
+			node<T>* tmp = h->next;
+			T tmp2 = tmp->d();
+
+			h->next = tmp->next; // overlap
+
+			tmp->next = nullptr;
+			delete tmp;
+
+			len--; // update length
+
+			return tmp2;
+		} 
+		// should i have else?!?!?
+	}
 }
 
 template <class T>

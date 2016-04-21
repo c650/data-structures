@@ -8,7 +8,7 @@ node<T>::~node() {
 		delete next;
 	}
 
-	debug("node<T>::~node was called!");
+	//debug("node<T>::~node was called!");
 }
 
 template <class T>
@@ -19,6 +19,11 @@ T& node<T>::d() {
 template <class T>
 void node<T>::d(T _data) {
 	data = _data;
+}
+
+template<class T>
+node<T>* node<T>::n() {
+	return next;
 }
 
 template <class T>

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../debug.cpp"
+//#include "../debug.cpp"
 // custom files
 #include "./node.h"
 #include "./node.cpp"
