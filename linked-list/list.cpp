@@ -136,6 +136,9 @@ T List<T>::del(const size_t& idx) {
 		} 
 		// should i have else?!?!?
 	}
+
+	return 0;
+	// maybe throw range error? not sure yet...
 }
 
 template <class T>

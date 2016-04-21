@@ -19,15 +19,15 @@ class List {
 
   	T pop();
 
-  	node<T>* search(const T& q);
+      node<T>* search(const T& q);
 
-    node<T>* insert(T val, const size_t& idx);
+      node<T>* insert(T val, const size_t& idx);
 
-    T del(const size_t& idx);
+      T del(const size_t& idx);
 
-    size_t size();
+      size_t size();
 
-    void print();
+      void print();
 
 
 };

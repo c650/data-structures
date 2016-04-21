@@ -26,11 +26,7 @@ int main() {
 		std::cout << "6 was not found in mylist\n";
 	}
 
-	auto a = mylist.insert(7, 9);
-
-	if (a == nullptr) {
-		std::cout <<"convention worked\n";
-	}
+	int a = mylist.del(3);
 
 	mylist.print();
 	return 0;
