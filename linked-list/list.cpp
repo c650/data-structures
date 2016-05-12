@@ -68,14 +68,9 @@ template <class T>
 node<T>* List<T>::search(const T& q) {
 	node<T>* h = root;
 
-	while(h != nullptr) {
-
-		if (h->d() == q)
-			return h;
-
+	while(h != nullptr && h->d() != q)
 		h = h->next;
-	}
-
+	
 	return nullptr;
 }
 

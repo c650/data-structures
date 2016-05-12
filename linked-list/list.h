@@ -28,6 +28,4 @@ class List {
       size_t size();
 
       void print();
-
-
 };
