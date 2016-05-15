@@ -132,8 +132,7 @@ T List<T>::del(const size_t& idx) {
 		// should i have else?!?!?
 	}
 
-	return 0;
-	// maybe throw range error? not sure yet...
+	throw std::out_of_range("ERROR: there is no node at that index to delete!");
 }
 
 template <class T>
