@@ -75,7 +75,7 @@ node<T>* List<T>::search(const T& q) {
 }
 
 template <class T>
-node<T>* List<T>::insert(T val, const size_t& idx) {
+T List<T>::insert(T val, const size_t& idx) {
 	node<T>* h = root;
 	size_t cnt = 0;
 
@@ -95,13 +95,13 @@ node<T>* List<T>::insert(T val, const size_t& idx) {
 
 			len++; // update length
 
-			return new_node;
+			return val;
 		} 
 		// should i have else?!?!?
 	}
 
 	// WATCH THIS LINE
-	return nullptr;
+	throw std::out_of_range("ERROR: called insert() past the acceptable range of the current linked list");
 }
 
 template <class T>
