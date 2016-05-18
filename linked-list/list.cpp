@@ -76,6 +76,11 @@ node<T>* List<T>::search(const T& q) {
 
 template <class T>
 T List<T>::insert(T val, const size_t& idx) {
+	if (idx == 0 && root == nullptr) {
+		this->append(val);
+		return val;
+	}
+
 	node<T>* h = root;
 	size_t cnt = 0;
 
