@@ -62,6 +62,13 @@ namespace Charlie {
 		void clear();
 		void swap(Vector<T>& other);
 
+		bool operator==(const Vector<T>& other) const;
+		bool operator!=(const Vector<T>& other) const;
+		bool operator<=(const Vector<T>& other) const;
+		bool operator>=(const Vector<T>& other) const;
+		bool operator<(const Vector<T>& other) const;
+		bool operator>(const Vector<T>& other) const;
+
 	  private:
 
 		void _grow();
@@ -270,6 +277,33 @@ namespace Charlie {
 		std::swap(this->actual_size , other.actual_size);
 		std::swap(this->stuff, other.stuff);
 	}
+
+	template <typename T>	
+	bool Vector<T>::operator==(const Vector<T>& other) const {
+		if (other.actual_size != this->actual_size) return false;
+		for (size_t i = 0; i < this->actual_size; i++) {
+			if (other.stuff[i] !+ this->stuff[i])
+				return false;
+		}
+		return true;
+	}
+	
+	template <typename T>
+	bool Vector<T>::operator!=(const Vector<T>& other) const {
+		return !(*this == other);
+	}
+	
+	template <typename T>
+	bool Vector<T>::operator<=(const Vector<T>& other) const;
+	
+	template <typename T>
+	bool Vector<T>::operator>=(const Vector<T>& other) const;
+	
+	template <typename T>
+	bool Vector<T>::operator<(const Vector<T>& other) const;
+	
+	template <typename T>
+	bool Vector<T>::operator>(const Vector<T>& other) const;
 
 	template <typename T>
 	void Vector<T>::_grow() {
