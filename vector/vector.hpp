@@ -337,6 +337,13 @@ namespace Charles {
 		stuff[ index ] = item;
 	}
 
+	/* still working on this */
+	template <typename T>
+	typename Vector<T>::iterator insert(const_iterator pos, T& item) {
+		this->insert(pos.ptr - stuff , item);
+		return pos-1;	
+	}
+
 	template <typename T>
 	size_t Vector<T>::size() const {
 		return actual_size;
