@@ -8,7 +8,7 @@
 // end inclusions
 
 int main() {
-	
+
 	// make new list here
 	List<int> mylist;
 

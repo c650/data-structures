@@ -38,7 +38,7 @@ void List<T>::append(T _data) {
 		h = h->next;
 	}
 	//debug("got to end of linked list");
-	
+
 	h->next = new node<T>(_data);
 	//debug("new node has been made");
 
@@ -70,7 +70,7 @@ node<T>* List<T>::search(const T& q) {
 
 	while(h != nullptr && h->d() != q)
 		h = h->next;
-	
+
 	return nullptr;
 }
 
@@ -95,13 +95,13 @@ T List<T>::insert(T val, const size_t& idx) {
 			node<T>* new_node = new node<T>(val);
 
 			new_node->next = h->next;
-			
+
 			h->next = new_node;
 
 			len++; // update length
 
 			return val;
-		} 
+		}
 		// should i have else?!?!?
 	}
 
@@ -121,7 +121,7 @@ T List<T>::del(const size_t& idx) {
 
 	if (cnt == idx - 1) {
 		if (h != nullptr) {
-			
+
 			node<T>* tmp = h->next;
 			T tmp2 = tmp->d();
 
@@ -133,7 +133,7 @@ T List<T>::del(const size_t& idx) {
 			len--; // update length
 
 			return tmp2;
-		} 
+		}
 		// should i have else?!?!?
 	}
 

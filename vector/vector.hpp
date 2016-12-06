@@ -5,24 +5,85 @@
 	12/4/16
 */
 #include <stdexcept>
+#include <initializer_list>
+#include <iterator>
 
-namespace Charlie {
+namespace Charles {
+
+	/*
+		This implementation corresponds closely to std::vector,
+		except that Allocators are not present here. Also, I have
+		added .each and .map, because sorta-functional programming
+		is pretty cool.
+	*/
 
 	typedef unsigned int size_t;
 
 	template <typename T>
 	class Vector {
+
+		typedef T value_type;
+		typedef long difference_type;
+		typedef value_type& reference;
+		typedef const reference const_reference;
+		typedef T* pointer;
+		typedef const pointer const_pointer;
+
 		T *stuff;
 		size_t actual_size, num_elements;
+
+		class _iterator : public std::iterator<std::random_access_iterator_tag, value_type, difference_type, pointer, reference> {
+
+			T* ptr;
+
+		  public:
+			explicit _iterator(T* _ptr) : ptr(_ptr) {}
+
+			_iterator& operator++() {
+				return ++ptr;
+			}
+			_iterator operator++(int) {
+				return ptr++;
+			}
+
+			_iterator& operator--() {
+				return --ptr;
+			}
+			_iterator operator--(int) {
+				return ptr--;
+			}
+
+			bool operator==(const _iterator& other) const {
+				return this->ptr == other.ptr;
+			}
+			bool operator!=(const _iterator& other) const {
+				return this->ptr != other.ptr;
+			}
+
+			reference operator*() const {
+				return *ptr;
+			}
+		};
+
+		typedef _iterator iterator;
+		typedef const iterator const_iterator;
+		typedef std::reverse_iterator<iterator> reverse_iterator;
+		typedef const reverse_iterator const_reverse_iterator;
+
 
 	  public:
 		Vector();
 		Vector(size_t _size, T def = T());
 		Vector(const Vector<T>& other);
 		Vector(Vector<T>&& other);
+		Vector(std::initializer_list<T> init);
+
+		template <class InputIt>
+		Vector(InputIt _begin, InputIt _end);
 
 		void operator=(const Vector<T>& other);
 		void operator=(Vector<T>&& other);
+		void operator=(std::initializer_list<T> init);
 
 		~Vector();
 
@@ -38,15 +99,25 @@ namespace Charlie {
 		T& back();
 		const T& back() const;
 
+		iterator& begin();
+		iterator& end();
+		const_iterator& cbegin() const;
+		const_iterator& cend() const;
+
 		T* data();
 		const T* data() const;
 
 		bool empty() const;
 
 		void push_back(const T& item);
-		T pop_back();
+ 		T pop_back();
 
 		void insert(const int& index , const T& item);
+
+		/* TODO: */
+		iterator insert(const_iterator pos, T& item);
+		iterator insert(const_iterator pos, T&& item);
+		iterator insert(const_iterator pos, size_t count, T& item);
 
 		size_t size() const;
 		size_t capacity() const;
@@ -68,6 +139,12 @@ namespace Charlie {
 		bool operator>=(const Vector<T>& other) const;
 		bool operator<(const Vector<T>& other) const;
 		bool operator>(const Vector<T>& other) const;
+
+		template <class Func>
+		Vector<T> map(const Func& f);
+
+		template <class Func>
+		void each(const Func& f) const;
 
 	  private:
 
@@ -101,6 +178,22 @@ namespace Charlie {
 	}
 
 	template <typename T>
+	Vector<T>::Vector(std::initializer_list<T> init) {
+		*this = init;
+	}
+
+	template <typename T>
+	template <class InputIt>
+	Vector<T>::Vector(InputIt _begin, InputIt _end) {
+		num_elements = actual_size = std::distance(_end, _begin);
+
+		stuff = new T[actual_size];
+		for (size_t i = 0; i < num_elements && _begin != _end; i++) {
+			stuff[i] = *_begin++;
+		}
+	}
+
+	template <typename T>
 	void Vector<T>::operator=(const Vector<T>& other) {
 		if (this == &other)
 			return;
@@ -125,6 +218,15 @@ namespace Charlie {
 
 		stuff = other.stuff;
 		other.stuff = nullptr;
+	}
+
+	template <typename T>
+	void Vector<T>::operator=(std::initializer_list<T> init) {
+		num_elements = actual_size = init.size();
+		stuff = new T[actual_size];
+		for (size_t i = 0; i < num_elements; i++) {
+			stuff[i] = init[i];
+		}
 	}
 
 	template <typename T>
@@ -174,6 +276,26 @@ namespace Charlie {
 	template <typename T>
 	const T& Vector<T>::back() const {
 		return at(num_elements - 1);
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator& Vector<T>::begin() {
+		return iterator(stuff);
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator& Vector<T>::end() {
+		return iterator(stuff + num_elements);
+	}
+
+	template <typename T>
+	typename Vector<T>::const_iterator& Vector<T>::cbegin() const {
+		return begin();
+	}
+
+	template <typename T>
+	typename Vector<T>::const_iterator& Vector<T>::cend() const {
+		return end();
 	}
 
 	template <typename T>
@@ -278,32 +400,74 @@ namespace Charlie {
 		std::swap(this->stuff, other.stuff);
 	}
 
-	template <typename T>	
+	template <typename T>
 	bool Vector<T>::operator==(const Vector<T>& other) const {
-		if (other.actual_size != this->actual_size) return false;
-		for (size_t i = 0; i < this->actual_size; i++) {
-			if (other.stuff[i] !+ this->stuff[i])
+		if (other.num_elements != this->num_elements) return false;
+		for (size_t i = 0; i < this->num_elements; i++) {
+			if (other.stuff[i] != this->stuff[i])
 				return false;
 		}
 		return true;
 	}
-	
+
 	template <typename T>
 	bool Vector<T>::operator!=(const Vector<T>& other) const {
 		return !(*this == other);
 	}
-	
+
 	template <typename T>
-	bool Vector<T>::operator<=(const Vector<T>& other) const;
-	
+	bool Vector<T>::operator<=(const Vector<T>& other) const {
+		/* check that *this <= other by factoring out a NOT */
+		return !(*this > other);
+	}
+
 	template <typename T>
-	bool Vector<T>::operator>=(const Vector<T>& other) const;
-	
+	bool Vector<T>::operator>=(const Vector<T>& other) const {
+		return !(*this < other);
+	}
+
 	template <typename T>
-	bool Vector<T>::operator<(const Vector<T>& other) const;
-	
+	bool Vector<T>::operator<(const Vector<T>& other) const {
+		size_t n = this->num_elements < other.num_elements ? this->num_elements : other.num_elements;
+		for (size_t i = 0; i < n; i++) {
+			if ( this->stuff[i] >= other.stuff[i] )
+				return false;
+		}
+		/* A shorter list is "less than," but two list of equal size are
+			ALSO "less than" because the elements of *this must all be less than
+			the corresponding elements of other to have gotten this far. */
+		return this->num_elements <= other.num_elements;
+	}
+
 	template <typename T>
-	bool Vector<T>::operator>(const Vector<T>& other) const;
+	bool Vector<T>::operator>(const Vector<T>& other) const {
+		size_t n = this->num_elements < other.num_elements ? this->num_elements : other.num_elements;
+		for (size_t i = 0; i < n; i++) {
+			if ( this->stuff[i] <= other.stuff[i] )
+				return false;
+		}
+		/* same logic as < */
+		return this->num_elements >= other.num_elements;
+	}
+
+	template <typename T>
+	template <class Func>
+	Vector<T> Vector<T>::map(const Func& f) {
+		Vector<T> new_vec(*this);
+		for (size_t i = 0; i < num_elements; i++)
+			f(new_vec[i]);
+		return new_vec;
+	}
+
+	template <typename T>
+	template <class Func>
+	void Vector<T>::each(const Func& f) const {
+		T tmp;
+		for (size_t i = 0; i < num_elements; i++) {
+			tmp = stuff[i];
+			f(tmp);
+		}
+	}
 
 	template <typename T>
 	void Vector<T>::_grow() {
