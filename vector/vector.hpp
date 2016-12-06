@@ -73,7 +73,7 @@ namespace Charles {
 
 	  public:
 		Vector();
-		Vector(size_t _size, T def = T());
+		explicit Vector(size_t _size, T def = T());
 		Vector(const Vector<T>& other);
 		Vector(Vector<T>&& other);
 		Vector(std::initializer_list<T> init);
