@@ -12,12 +12,14 @@ namespace Charles {
 			T data;
 			struct node *next, *prev;
 
-			node(T _data) : data(_data) , next(nullptr) {}
-			node() : this(T()) {}
+			explicit node(T _data, struct node *_prev = nullptr, struct node *_next = nullptr)
+				: data(_data),
+				prev(_prev),
+				next(_next) {}
 		};
 
 		node *first, *last;
-		size_t len;
+		size_t num_elements;
 
 	  public:
 
@@ -36,17 +38,18 @@ namespace Charles {
 
 		~List();
 
-	  	void append(T _data);
-
-	  	T pop();
-
-		node<T>* search(const T& q);
-
-		node<T>* insert(T val, const size_t& idx);
-
-		T del(const size_t& idx);
+		void assign()
 
 		size_t size();
+		bool empty();
+
+		T& front();
+		T& end();
+
+		iterator begin();
+		iterator end();
+		const_iterator begin() const;
+		const_iterator end() const;
 
 	};
 }
