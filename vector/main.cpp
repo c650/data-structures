@@ -38,8 +38,29 @@ int main() {
 	qprint(test2 > test3);
 	qprint(test2 == test3);
 
-	test2.clear();
-	test3.shrink_to_fit();
+	std::cout << test2.pop_back() << "pb\n"
+				<< test2.capacity() << "cap\n";
+
+	std::cout << test2.size() << "size\n";
+
+	for (auto it = test2.begin(); it != test2.end(); it++) {
+		*it *= 2;
+		std::cout << *it << " ";
+	}
+	std::cout << "\n";
+
+	test2.insert(test2.begin(), 7);
+	for (auto it = test2.begin(); it != test2.end(); it++) {
+		*it *= 2;
+		std::cout << *it << " ";
+	}
+	std::cout << "\n";
+
+	Charles::Vector<int> test4 = {1,2,3,4};
+	test4.each([](int a){
+		std::cout << a << " ";
+	});
+	std::cout << "\n";
 
 	return 0;
 }
