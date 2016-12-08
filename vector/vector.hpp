@@ -94,9 +94,9 @@ namespace Charles {
 		template <class InputIt>
 		Vector(InputIt _begin, InputIt _end);
 
-		void operator=(const Vector<T>& other);
-		void operator=(Vector<T>&& other);
-		void operator=(std::initializer_list<T> init);
+		Vector<T>& operator=(const Vector<T>& other);
+		Vector<T>& operator=(Vector<T>&& other);
+		Vector<T>& operator=(std::initializer_list<T> init);
 
 		~Vector();
 
@@ -207,9 +207,9 @@ namespace Charles {
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(const Vector<T>& other) {
+	Vector<T>& Vector<T>::operator=(const Vector<T>& other) {
 		if (this == &other)
-			return;
+			return *this;
 
 		actual_size = other.actual_size;
 		stuff = new T[actual_size];
@@ -219,27 +219,30 @@ namespace Charles {
 			stuff[num_elements] = other.stuff[num_elements];
 			num_elements++;
 		}
+		return *this;
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(Vector<T>&& other) {
+	Vector<T>& Vector<T>::operator=(Vector<T>&& other) {
 		if (this == &other)
-			return;
+			return *this;
 
 		actual_size = other.actual_size;
 		num_elements = other.num_elements;
 
 		stuff = other.stuff;
 		other.stuff = nullptr;
+		return *this;
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(std::initializer_list<T> init) {
+	Vector<T>& Vector<T>::operator=(std::initializer_list<T> init) {
 		num_elements = actual_size = init.size();
 		stuff = new T[actual_size];
 		for (size_t i = 0; i < num_elements; i++) {
 			stuff[i] = *(init.begin() + i);
 		}
+		return *this;
 	}
 
 	template <typename T>
