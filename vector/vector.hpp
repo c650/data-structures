@@ -8,6 +8,8 @@
 #include <initializer_list>
 #include <iterator>
 
+#include <iostream>
+
 namespace Charles {
 
 	/*
@@ -33,24 +35,35 @@ namespace Charles {
 		size_t actual_size, num_elements;
 
 		class _iterator : public std::iterator<std::random_access_iterator_tag, value_type, difference_type, pointer, reference> {
-
+		  public:
 			T* ptr;
 
-		  public:
 			explicit _iterator(T* _ptr) : ptr(_ptr) {}
 
 			_iterator& operator++() {
-				return ++ptr;
+				++ptr;
+				return this;
 			}
 			_iterator operator++(int) {
-				return ptr++;
+				T* temp = ptr++;
+				return _iterator(temp);
 			}
 
 			_iterator& operator--() {
-				return --ptr;
+				--ptr;
+				return this;
 			}
 			_iterator operator--(int) {
-				return ptr--;
+				T* temp = ptr--;
+				return _iterator(temp);
+			}
+
+			_iterator operator+(difference_type s) {
+				return _iterator(ptr + s);
+			}
+
+			_iterator operator-(difference_type s) {
+				return _iterator(ptr - s);
 			}
 
 			bool operator==(const _iterator& other) const {
@@ -81,9 +94,9 @@ namespace Charles {
 		template <class InputIt>
 		Vector(InputIt _begin, InputIt _end);
 
-		void operator=(const Vector<T>& other);
-		void operator=(Vector<T>&& other);
-		void operator=(std::initializer_list<T> init);
+		Vector<T>& operator=(const Vector<T>& other);
+		Vector<T>& operator=(Vector<T>&& other);
+		Vector<T>& operator=(std::initializer_list<T> init);
 
 		~Vector();
 
@@ -99,10 +112,10 @@ namespace Charles {
 		T& back();
 		const T& back() const;
 
-		iterator& begin();
-		iterator& end();
-		const_iterator& cbegin() const;
-		const_iterator& cend() const;
+		iterator begin();
+		iterator end();
+		const_iterator cbegin() const;
+		const_iterator cend() const;
 
 		T* data();
 		const T* data() const;
@@ -112,12 +125,12 @@ namespace Charles {
 		void push_back(const T& item);
  		T pop_back();
 
-		void insert(const int& index , const T& item);
+		void insert(int& index , T& item);
 
 		/* TODO: */
-		iterator insert(const_iterator pos, T& item);
+		iterator insert(const_iterator pos, const T& item);
 		iterator insert(const_iterator pos, T&& item);
-		iterator insert(const_iterator pos, size_t count, T& item);
+		iterator insert(const_iterator pos, size_t count, const T& item);
 
 		size_t size() const;
 		size_t capacity() const;
@@ -194,9 +207,9 @@ namespace Charles {
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(const Vector<T>& other) {
+	Vector<T>& Vector<T>::operator=(const Vector<T>& other) {
 		if (this == &other)
-			return;
+			return *this;
 
 		actual_size = other.actual_size;
 		stuff = new T[actual_size];
@@ -206,32 +219,36 @@ namespace Charles {
 			stuff[num_elements] = other.stuff[num_elements];
 			num_elements++;
 		}
+		return *this;
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(Vector<T>&& other) {
+	Vector<T>& Vector<T>::operator=(Vector<T>&& other) {
 		if (this == &other)
-			return;
+			return *this;
 
 		actual_size = other.actual_size;
 		num_elements = other.num_elements;
 
 		stuff = other.stuff;
 		other.stuff = nullptr;
+		return *this;
 	}
 
 	template <typename T>
-	void Vector<T>::operator=(std::initializer_list<T> init) {
+	Vector<T>& Vector<T>::operator=(std::initializer_list<T> init) {
 		num_elements = actual_size = init.size();
 		stuff = new T[actual_size];
 		for (size_t i = 0; i < num_elements; i++) {
-			stuff[i] = init[i];
+			stuff[i] = *(init.begin() + i);
 		}
+		return *this;
 	}
 
 	template <typename T>
 	Vector<T>::~Vector() {
-		delete [] stuff;
+		if (stuff != nullptr)
+			delete [] stuff;
 	}
 
 	template <typename T>
@@ -279,22 +296,22 @@ namespace Charles {
 	}
 
 	template <typename T>
-	typename Vector<T>::iterator& Vector<T>::begin() {
+	typename Vector<T>::iterator Vector<T>::begin() {
 		return iterator(stuff);
 	}
 
 	template <typename T>
-	typename Vector<T>::iterator& Vector<T>::end() {
+	typename Vector<T>::iterator Vector<T>::end() {
 		return iterator(stuff + num_elements);
 	}
 
 	template <typename T>
-	typename Vector<T>::const_iterator& Vector<T>::cbegin() const {
+	typename Vector<T>::const_iterator Vector<T>::cbegin() const {
 		return begin();
 	}
 
 	template <typename T>
-	typename Vector<T>::const_iterator& Vector<T>::cend() const {
+	typename Vector<T>::const_iterator Vector<T>::cend() const {
 		return end();
 	}
 
@@ -315,7 +332,9 @@ namespace Charles {
 
 	template <typename T>
 	void Vector<T>::push_back(const T& item) {
-		insert(num_elements, item);
+		if (num_elements >= actual_size)
+			_grow();
+		stuff[num_elements++] = item;
 	}
 
 	template <typename T>
@@ -324,22 +343,42 @@ namespace Charles {
 	}
 
 	template <typename T>
-	void Vector<T>::insert(const int& index , const T& item) {
-		if (num_elements >= actual_size) {
+	void Vector<T>::insert(int& index , T& item) {
+		this->insert( begin() + index , 1 , item );
+	}
+
+	/* still working on this */
+	template <typename T>
+	typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, const T& item) {
+		return this->insert(pos, 1, item);
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, T&& item) {
+		return this->insert(pos, 1, item);
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator Vector<T>::insert(const_iterator pos, size_t count, const T& item) {
+		while (num_elements + count > actual_size)
 			_grow();
-		}
 
+		long curr = num_elements;
+		long index = pos.ptr - stuff;
 
-		int curr = num_elements++; /* pay attention to this. I'm too lazy to make it its own line. :) */
-		while (--curr >= index) {
-			stuff[curr+1] = stuff[curr];
+		while (--curr >= index ) {
+			stuff[curr + count] = stuff[curr];
 		}
-		stuff[ index ] = item;
+		for (size_t i = 0; i < count; i++) {
+			stuff[index++] = item;
+		}
+		num_elements += count;
+		return pos;
 	}
 
 	template <typename T>
 	size_t Vector<T>::size() const {
-		return actual_size;
+		return num_elements;
 	}
 
 	template <typename T>
