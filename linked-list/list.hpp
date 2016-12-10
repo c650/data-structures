@@ -1,3 +1,6 @@
+#ifndef CHARLES_LLIST_H
+#define CHARLES_LLIST_H
+
 #include <stdexcept>
 #include <initializer_list>
 #include <reverse_iterator>
@@ -324,3 +327,6 @@ namespace Charles {
 		}
 	}
 }
+#endif // CHARLES_VECTOR_H 
+
+
