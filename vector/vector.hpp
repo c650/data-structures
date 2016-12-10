@@ -4,6 +4,10 @@
 
 	12/4/16
 */
+
+#ifndef CHARLES_VECTOR_H
+#define CHARLES_VECTOR_H
+
 #include <stdexcept>
 #include <initializer_list>
 #include <iterator>
@@ -530,3 +534,5 @@ namespace Charles {
 	}
 
 };
+
+#endif // CHARLES_VECTOR_H
