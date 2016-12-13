@@ -3,7 +3,8 @@
 
 #include <stdexcept>
 #include <initializer_list>
-#include <reverse_iterator>
+#include <iterator>
+#include <iostream>
 
 namespace Charles {
 
@@ -14,7 +15,7 @@ namespace Charles {
 	  private:
 		struct node {
 			T data;
-			struct node *next, *prev;
+			struct node *prev, *next;
 
 			explicit node(T _data, struct node *_prev = nullptr, struct node *_next = nullptr)
 				: data(_data),
@@ -40,7 +41,7 @@ namespace Charles {
 
 			_iterator& operator++() {
 				curr = curr->next;
-				return this;
+				return *this;
 			}
 			_iterator operator++(int) {
 				node *tmp = curr;
@@ -50,7 +51,7 @@ namespace Charles {
 
 			_iterator& operator--() {
 				curr = curr->prev;
-				return this;
+				return *this;
 			}
 			_iterator operator--(int) {
 				node *tmp = curr;
@@ -73,10 +74,10 @@ namespace Charles {
 			}
 
 			bool operator==(const _iterator& other) const {
-				return this->ptr == other.ptr;
+				return this->curr == other.curr;
 			}
 			bool operator!=(const _iterator& other) const {
-				return this->ptr != other.ptr;
+				return this->curr != other.curr;
 			}
 
 			reference operator*() const {
@@ -107,7 +108,7 @@ namespace Charles {
 		~List();
 
 		void assign(size_t count, const T& value = T()); /* TODO */
-		_destroy;
+
 		size_t size();
 		bool empty();
 
@@ -116,14 +117,16 @@ namespace Charles {
 
 		iterator begin();
 		iterator end();
-		const_iterator begin() const;
-		const_iterator end() const;
+		const_iterator cbegin() const;
+		const_iterator cend() const;
 
 		void push_back(const T& elem);
 		void push_front(const T& elem);
 
 		T pop_back();
 		T pop_front();
+
+		void clear();
 
 	private:
 		/*              HELPERS              */
@@ -133,18 +136,20 @@ namespace Charles {
 	};
 
 	template<typename T>
-	List<T>::List() : this(0) { }
+	List<T>::List() : List(0) { }
 
 	template<typename T>
-	List<T>::List(size_t count , const T& value = T()) {
+	List<T>::List(size_t count , const T& value) {
+		first = last = nullptr;
+		num_elements = 0;
 		this->_init(count, value);
 	}
 
 	template<typename T>
-	List<T>::List(const List& other) : this(other.num_elements) {
+	List<T>::List(const List& other) : List(other.num_elements) {
 		if (this == &other) return;
 
-		for (auto it = this->begin(), o_it = other.begin() ; it != this->end() && o_it != other.end(); it++, o_it++)
+		for (auto it = this->begin(), o_it = other.cbegin() ; it != this->end() && o_it != other.cend(); it++, o_it++)
 			*it = *o_it;
 	}
 
@@ -159,18 +164,19 @@ namespace Charles {
 	}
 
 	template<typename T>
-	List<T>::List(std::initializer_list<T> init) : this(init.size()) {
+	List<T>::List(std::initializer_list<T> init) : List(init.size()) {
 		auto init_list_it = init.begin();
 		auto ll_it = this->begin();
 		for (; init_list_it != init.end() && ll_it != this->end() ; init_list_it++, ll_it++)
 			*ll_it = *init_list_it;
 	}
 
-	// template<typename T>
-	// template<class InputIt>
-	// List<T>::List(InputIt _begin, InputIt _end) {
-	//
-	// }
+	template<typename T>
+	template<class InputIt>
+	List<T>::List(InputIt _begin, InputIt _end) : List(0) {
+		while(_begin != _end)
+			this->push_back(*_begin++);
+	}
 
 	template<typename T>
 	List<T>::~List() {
@@ -178,7 +184,7 @@ namespace Charles {
 	}
 
 	template<typename T>
-	assign(size_t count, const T& value = T()) {
+	void List<T>::assign(size_t count, const T& value) {
 		_destroy();
 		_init(count, value);
 	}
@@ -229,14 +235,14 @@ namespace Charles {
 	template<typename T>
 	T& List<T>::front() {
 		if (empty())
-			throw std::out_of_bounds("This List is empty.");
+			throw std::out_of_range("This List is empty.");
 		return first->data;
 	}
 
 	template<typename T>
 	T& List<T>::back() {
 		if (empty())
-			throw std::out_of_bounds("This List is empty.");
+			throw std::out_of_range("This List is empty.");
 		return last->data;
 	}
 
@@ -245,8 +251,11 @@ namespace Charles {
 		if (empty()) {
 			_init(1, elem);
 		} else {
-			this->last = this->last->next = new node(elem, this->last, nullptr);
+			this->last->next = new node(elem, this->last, nullptr);
+			this->last = this->last->next;
 		}
+		num_elements++;
+
 	}
 
 	template<typename T>
@@ -256,10 +265,12 @@ namespace Charles {
 		} else {
 			this->first = this->first->prev = new node(elem, nullptr, this->first);
 		}
+		num_elements++;
 	}
 
 	template<typename T>
 	T List<T>::pop_back() {
+		num_elements--;
 		T elem = this->last->data;
 		node *tmp = this->last;
 		this->last = this->last->prev;
@@ -269,6 +280,7 @@ namespace Charles {
 
 	template<typename T>
 	T List<T>::pop_front() {
+		num_elements--;
 		T elem = this->first->data;
 		node *tmp = this->first;
 		this->first = this->first->next;
@@ -277,23 +289,28 @@ namespace Charles {
 	}
 
 	template<typename T>
-	typename iterator begin() {
+	typename List<T>::iterator List<T>::begin() {
 		return iterator(this->first);
 	}
 
 	template<typename T>
-	typename iterator end() {
+	typename List<T>::iterator List<T>::end() {
 		return iterator( this->last->next ); /* a fancy way to say nullptr */
 	}
 
 	template<typename T>
-	typename const_iterator begin() const {
-		begin();
+	typename List<T>::const_iterator List<T>::cbegin() const {
+		return iterator(this->first);
 	}
 
 	template<typename T>
-	typename const_iterator end() const {
-		end();
+	typename List<T>::const_iterator List<T>::cend() const {
+		return iterator( this->last->next );
+	}
+
+	template <typename T>
+	void List<T>::clear() {
+		_destroy();
 	}
 
 	/* ----------------------- */
@@ -301,7 +318,7 @@ namespace Charles {
 	/* ----------------------- */
 
 	template<typename T>
-	void Vector<T>::_init(size_t count, const T& value = T()) {
+	void List<T>::_init(size_t count, const T& value) {
 		if (num_elements != 0 || first != nullptr)
 			return;/* rudimentary way to avoid memory leaks at this point... */
 
@@ -309,14 +326,15 @@ namespace Charles {
 		if ( count != 0 ) {
 			this->first = this->last = new node(value, nullptr, nullptr);
 			for (size_t i = 1; i < count; i++) {
-				this->last->next = this->last = new node(value, this->last, nullptr); /* if this works, it'd be so cool, omg. */
+				this->last->next = new node(value, this->last, nullptr); /* if this works, it'd be so cool, omg. */
+				this->last = this->last->next;
 			}
 		}
 		num_elements = count;
 	}
 
 	template<typename T>
-	void Vector<T>::_destroy() {
+	void List<T>::_destroy() {
 		node *curr, *last;
 		curr = first;
 		last = nullptr;
@@ -325,8 +343,7 @@ namespace Charles {
 			curr = curr->next;
 			delete last;
 		}
+		num_elements = 0;
 	}
 }
-#endif // CHARLES_VECTOR_H 
-
-
+#endif // CHARLES_VECTOR_H
