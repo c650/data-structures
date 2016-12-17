@@ -59,18 +59,18 @@ namespace Charles {
 				return _iterator(tmp);
 			}
 
-			_iterator operator+(difference_type s) {
+			_iterator operator+(difference_type s) const {
 				node *tmp = curr;
-				while(curr != nullptr && s--)
-					curr = curr->next;
-				return _iterator(curr);
+				while(tmp != nullptr && s--)
+					tmp = tmp->next;
+				return _iterator(tmp);
 			}
 
-			_iterator operator-(difference_type s) {
+			_iterator operator-(difference_type s) const {
 				node *tmp = curr;
-				while(curr != nullptr && s--)
-					curr = curr->prev;
-				return _iterator(curr);
+				while(tmp != nullptr && s--)
+					tmp = tmp->prev;
+				return _iterator(tmp);
 			}
 
 			bool operator==(const _iterator& other) const {
@@ -107,7 +107,17 @@ namespace Charles {
 
 		~List();
 
-		void assign(size_t count, const T& value = T()); /* TODO */
+		void assign(size_t count, const T& value = T());
+
+		iterator insert( const_iterator pos, const T& value );
+		iterator insert( const_iterator pos, T&& value );
+		iterator insert( const_iterator pos, size_t count, const T& value );
+
+		template <class InputIt>
+		iterator insert( const_iterator pos, InputIt first, InputIt last );
+
+		iterator insert( const_iterator pos, std::initializer_list<T> ilist );
+
 
 		size_t size();
 		bool empty();
@@ -132,6 +142,8 @@ namespace Charles {
 		/*              HELPERS              */
 		void _init(size_t count, const T& value = T());
 		void _destroy();
+
+		void _insert( typename List<T>::const_iterator pos, List<T>& other );
 
 	};
 
@@ -289,6 +301,44 @@ namespace Charles {
 	}
 
 	template<typename T>
+	typename List<T>::iterator List<T>::insert( typename List<T>::const_iterator pos, const T& value ) {
+		return this->insert( pos , 1 , value); /* calling third version */
+	}
+
+	// template<typename T>
+	// typename List<T>::iterator List<T>::insert( typename List<T>::const_iterator pos, T&& value ) {
+	//
+	// }
+
+	template<typename T>
+	typename List<T>::iterator List<T>::insert( typename List<T>::const_iterator pos, size_t count, const T& value ) {
+		if ( !count ) return pos;
+
+		List<T> other( count , value );
+		this->_insert( pos, other );
+		return pos - count;
+	}
+
+	template<typename T>
+	template <class InputIt>
+	typename List<T>::iterator List<T>::insert( typename List<T>::const_iterator pos, InputIt first, InputIt last ) {
+		if (first == last) return pos;
+
+		List<T> other( first , last );
+		this->_insert( pos , other );
+		return pos - std::distance(first,last);
+	}
+
+	template<typename T>
+	typename List<T>::iterator List<T>::insert( typename List<T>::const_iterator pos, std::initializer_list<T> ilist ) {
+		if ( !ilist.size() ) return pos;
+
+		List<T> other( ilist );
+		this->_insert( pos , other );
+		return pos - ilist.size();
+	}
+
+	template<typename T>
 	typename List<T>::iterator List<T>::begin() {
 		return iterator(this->first);
 	}
@@ -344,6 +394,33 @@ namespace Charles {
 			delete last;
 		}
 		num_elements = 0;
+	}
+
+	template<typename T>
+	void List<T>::_insert( typename List<T>::const_iterator pos, List<T>& other ) {
+		auto curr = pos.curr;// != nullptr ? pos.curr : this->last;
+
+		// BROKEN
+		if (curr) {
+			if (curr->prev) {
+				curr->prev->next = other.first;
+			}
+			if (curr->next) {
+				curr->next->prev = other.last;
+			}
+			other.first->prev = curr->prev;
+		}
+
+		other.last->next = curr;
+
+		while(this->first->prev != nullptr)
+			this->first = this->first->prev;
+		while(this->last->next != nullptr)
+			this->last = this->last->next;
+
+		other.first = other.last = nullptr; /* so that newly inserted elements aren't
+		                                       destroyed at the end of the func. */
+		// hi
 	}
 }
 #endif // CHARLES_VECTOR_H
