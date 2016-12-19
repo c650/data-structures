@@ -145,6 +145,14 @@ namespace Charles {
 
 		void _insert( typename List<T>::const_iterator pos, List<T>& other );
 
+		/*
+			@param n the node to unlink and delete
+
+			@return a pointer to the node after n,
+			or a nullptr if no next node exists.
+		*/
+		node *_unlink_and_delete(node *n);
+
 	};
 
 	template<class T>
@@ -425,5 +433,20 @@ namespace Charles {
 		other.first = other.last = nullptr; /* so that newly inserted elements aren't
 		                                       destroyed at the end of the func. */
 	}
+
+	template<class T>
+	node *List<T>::_unlink_and_delete(node *n) {
+
+		if (n->next)
+			n->next->prev = n->prev;
+		if (n->prev)
+			n->prev->next = n->next;
+
+		node *next = n->next;
+		delete n;
+
+		return next;
+	}
+
 }
 #endif // CHARLES_VECTOR_H
