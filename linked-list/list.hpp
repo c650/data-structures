@@ -112,12 +112,13 @@ namespace Charles {
 		iterator insert( const_iterator pos, const T& value );
 		iterator insert( const_iterator pos, T&& value );
 		iterator insert( const_iterator pos, size_t count, const T& value );
+		iterator insert( const_iterator pos, std::initializer_list<T> ilist );
 
 		template <class InputIt>
 		iterator insert( const_iterator pos, InputIt first, InputIt last );
 
-		iterator insert( const_iterator pos, std::initializer_list<T> ilist );
-
+		iterator erase( const_iterator pos );
+		iterator erase( const_iterator first , const_iterator last );
 
 		size_t size();
 		bool empty();
@@ -346,13 +347,31 @@ namespace Charles {
 	}
 
 	template<class T>
+	typename List<T>::iterator List<T>::erase( typename List<T>::const_iterator pos ) {
+		List<T>::iterator it( _unlink_and_delete(pos.curr) );
+		num_elements--;
+		return it;
+	}
+
+	template<class T>
+	typename List<T>::iterator List<T>::erase( typename List<T>::const_iterator first , typename List<T>::const_iterator last ) {
+		List<T>::iterator it = first;
+		while (it != last) {
+			_unlink_and_delete(it.curr);
+			it++;
+			num_elements--;
+		}
+		return last;
+	}
+
+	template<class T>
 	typename List<T>::iterator List<T>::begin() {
-		return iterator(this->first);
+		return iterator( this->first );
 	}
 
 	template<class T>
 	typename List<T>::iterator List<T>::end() {
-		return iterator( this->last->next ); /* a fancy way to say nullptr */
+		return iterator( nullptr );
 	}
 
 	template<class T>
@@ -362,7 +381,7 @@ namespace Charles {
 
 	template<class T>
 	typename List<T>::const_iterator List<T>::cend() const {
-		return iterator( this->last->next );
+		return iterator( nullptr );
 	}
 
 	template <class T>
@@ -435,12 +454,19 @@ namespace Charles {
 	}
 
 	template<class T>
-	node *List<T>::_unlink_and_delete(node *n) {
+	typename List<T>::node *List<T>::_unlink_and_delete(typename List<T>::node *n) {
+		if (n == nullptr)
+			return nullptr;
 
 		if (n->next)
 			n->next->prev = n->prev;
 		if (n->prev)
 			n->prev->next = n->next;
+
+		if (n == first)
+			first = first->next;
+		if (n == last)
+			last = last->prev;
 
 		node *next = n->next;
 		delete n;

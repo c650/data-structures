@@ -56,5 +56,13 @@ int main(void) {
 	print_out(test5.begin() , test5.end());
 	std::cout << test5.size() << '\n';
 
+	test5.erase(test5.begin());
+	print_out(test5.begin() , test5.end());
+	std::cout << test5.size() << '\n';
+
+	test5.erase(test5.begin() , test5.end());
+	print_out(test5.begin() , test5.end());
+	std::cout << test5.size() << '\n';
+
 	return 0;
 }
