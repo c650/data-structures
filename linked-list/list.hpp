@@ -235,6 +235,9 @@ namespace Charles {
 
 	template<class T>
 	List<T>& List<T>::operator=(List&& other) {
+		if (this == &other)
+			return *this;
+
 		this->first        = other.first;
 		this->last         = other.last;
 		this->num_elements = other.num_elements;
