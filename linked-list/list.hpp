@@ -120,12 +120,13 @@ namespace Charles {
 		iterator erase( const_iterator pos );
 		iterator erase( const_iterator first , const_iterator last );
 
+		void resize( size_t count , T value = T() );
+
 		size_t size();
 		bool empty();
 
 		T& front();
 		T& back();
-
 		iterator begin();
 		iterator end();
 		const_iterator cbegin() const;
@@ -134,17 +135,20 @@ namespace Charles {
 		void push_back(const T& elem);
 		void push_front(const T& elem);
 
+
 		T pop_back();
 		T pop_front();
 
 		void clear();
+
+		void swap(List<T>& other);
 
 	private:
 		/*              HELPERS              */
 		void _init(size_t count, const T& value = T());
 		void _destroy();
 
-		void _insert( typename List<T>::const_iterator pos, List<T>& other );
+		void _insert( const_iterator pos, List<T>& other );
 
 		/*
 			@param n the node to unlink and delete
@@ -365,6 +369,15 @@ namespace Charles {
 	}
 
 	template<class T>
+	void List<T>::resize( size_t count , T value ) {
+		if (num_elements > count) {
+			this->erase( this->begin() + count , this->end() );
+		} else if (num_elements < count) {
+			this->insert( this->end() , count - num_elements , value );
+		}
+	}
+
+	template<class T>
 	typename List<T>::iterator List<T>::begin() {
 		return iterator( this->first );
 	}
@@ -387,6 +400,13 @@ namespace Charles {
 	template <class T>
 	void List<T>::clear() {
 		_destroy();
+	}
+
+	template <class T>
+	void List<T>::swap(List<T>& other) {
+		std::swap(this->num_elements , other.num_elements);
+		std::swap(this->first , other.first);
+		std::swap(this->last , other.last);
 	}
 
 	/* ----------------------- */

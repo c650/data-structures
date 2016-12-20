@@ -60,7 +60,12 @@ int main(void) {
 	print_out(test5.begin() , test5.end());
 	std::cout << test5.size() << '\n';
 
-	test5.erase(test5.begin() , test5.end());
+	test5.resize(5);
+	print_out(test5.begin() , test5.end());
+	std::cout << test5.size() << '\n';
+
+	test5.swap(test4);
+
 	print_out(test5.begin() , test5.end());
 	std::cout << test5.size() << '\n';
 
