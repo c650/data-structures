@@ -69,5 +69,14 @@ int main(void) {
 	print_out(test5.begin() , test5.end());
 	std::cout << test5.size() << '\n';
 
+	test5.reverse();
+	print_out(test5.begin() , test5.end());
+
+	test5.remove('c');
+	print_out(test5.begin() , test5.end());
+
+	test5.remove_if([](const char& c){return c < 'g';});
+	print_out(test5.begin() , test5.end());
+
 	return 0;
 }

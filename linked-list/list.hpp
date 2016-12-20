@@ -143,6 +143,13 @@ namespace Charles {
 
 		void swap(List<T>& other);
 
+		void reverse();
+
+		void remove(const T& value);
+
+		template <class UnaryPredicate>
+		void remove_if(UnaryPredicate p);
+
 	private:
 		/*              HELPERS              */
 		void _init(size_t count, const T& value = T());
@@ -407,6 +414,42 @@ namespace Charles {
 		std::swap(this->num_elements , other.num_elements);
 		std::swap(this->first , other.first);
 		std::swap(this->last , other.last);
+	}
+
+	template <class T>
+	void List<T>::reverse() {
+		auto it = this->begin(),
+		     it2  = this->begin() + (num_elements-1);
+
+		size_t swaps = num_elements / 2 ;
+		while (swaps--) std::swap(*it++ , *it2--);
+	}
+
+	template <class T>
+	void List<T>::remove(const T& value) {
+		List<T>::node *curr = first;
+		while (curr != nullptr) {
+			if (curr->data == value) {
+				curr = _unlink_and_delete(curr);
+				num_elements--;
+			} else {
+				curr = curr->next;
+			}
+		}
+	}
+
+	template <class T>
+	template <class UnaryPredicate>
+	void List<T>::remove_if( UnaryPredicate p ) {
+		List<T>::node *curr = first;
+		while (curr != nullptr) {
+			if ( p( curr->data ) ) {
+				curr = _unlink_and_delete(curr);
+				num_elements--;
+			} else {
+				curr = curr->next;
+			}
+		}
 	}
 
 	/* ----------------------- */
