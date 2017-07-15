@@ -46,7 +46,7 @@ namespace Charles {
 
 			_iterator& operator++() {
 				++ptr;
-				return this;
+				return *this;
 			}
 			_iterator operator++(int) {
 				T* temp = ptr++;
@@ -55,19 +55,23 @@ namespace Charles {
 
 			_iterator& operator--() {
 				--ptr;
-				return this;
+				return *this;
 			}
 			_iterator operator--(int) {
 				T* temp = ptr--;
 				return _iterator(temp);
 			}
 
-			_iterator operator+(difference_type s) {
+			_iterator operator+(difference_type s) const {
 				return _iterator(ptr + s);
 			}
 
-			_iterator operator-(difference_type s) {
+			_iterator operator-(difference_type s) const {
 				return _iterator(ptr - s);
+			}
+
+			difference_type operator-(_iterator& other) const {
+				return this->ptr > other.ptr ? this->ptr - other.ptr : other.ptr - this->ptr;
 			}
 
 			bool operator==(const _iterator& other) const {
@@ -148,6 +152,10 @@ namespace Charles {
 		void assign(size_t count , const T& value);
 
 		void clear();
+
+		iterator erase(const_iterator pos);
+		iterator erase(const_iterator first, const_iterator last);
+
 		void swap(Vector<T>& other);
 
 		bool operator==(const Vector<T>& other) const;
@@ -434,6 +442,21 @@ namespace Charles {
 			stuff[i] = T();
 		}
 		num_elements = 0;
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator Vector<T>::erase(const_iterator pos) {
+		return this->erase(pos, pos+1);
+	}
+
+	template <typename T>
+	typename Vector<T>::iterator Vector<T>::erase(const_iterator first, const_iterator last) {
+		for (iterator peek = last, hold = first; peek != this->end(); ++peek, ++hold) {
+			*hold = std::move(*peek);
+		}
+		// amend size.
+		num_elements -= std::distance(first, last); /* pretty sure the iterators meet RandomAccessIterator so this is constant time */
+		return first;
 	}
 
 	template <typename T>

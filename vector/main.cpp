@@ -62,5 +62,17 @@ int main() {
 	});
 	std::cout << "\n";
 
+	test4.erase(test4.begin());
+	test4.each([](int a){
+		std::cout << a << " ";
+	});
+	std::cout << "\n";
+
+	test4.erase(test4.begin(), test4.end()-1);
+	test4.each([](int a){
+		std::cout << a << " ";
+	});
+	std::cout << "\n";
+
 	return 0;
 }
