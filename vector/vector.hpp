@@ -404,7 +404,7 @@ namespace Charles {
 	template <typename T>
 	void Vector<T>::reserve(size_t new_size) {
 		if (new_size > actual_size)
-			_resize(actual_size);
+			_resize(new_size);
 	}
 
 	template <typename T>
